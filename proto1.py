@@ -19,30 +19,29 @@ fps = int(cap.get(cv2.CAP_PROP_FPS))
 # Define Video Writer
 out = cv2.VideoWriter('output.mp4', cv2.VideoWriter_fourcc(*'mp4v'), fps, (frame_width, frame_height))
 
-# Function to compute eyeball center with smoothing
-def capture_eye_ball(pupil_landmarks, face_landmarks, width, height, buffer):
-    points = np.array([[face_landmarks.landmark[i].x * width, face_landmarks.landmark[i].y * height] for i in pupil_landmarks])
-    center = np.mean(points, axis=0).astype(int)
-    buffer.append(center)
-    smoothed_center = np.mean(buffer, axis=0).astype(int)
-    return tuple(smoothed_center)
-
 # Smoothing buffers
 eyeball_buffer_left = deque(maxlen=5)
 eyeball_buffer_right = deque(maxlen=5)
 face_mesh_buffer = deque(maxlen=5)
+state_buffer = deque(maxlen=10)  # Store last 10 frame states
 
-def smooth_landmarks(face_landmarks, width, height, buffer):
-    points = np.array([[lm.x * width, lm.y * height] for lm in face_landmarks.landmark])
-    buffer.append(points)
-    smoothed_points = np.mean(buffer, axis=0).astype(int)
-    return smoothed_points
+# Transition tracking
+total_transitions = []
+non_steady_start_time = None
+initial_pupil_position = None
+transition_index = 1  # Initialize transition index
+
+def smooth_value(new_value, buffer):
+    """Applies smoothing by averaging over recent values."""
+    buffer.append(new_value)
+    return np.mean(buffer)
 
 while cap.isOpened():
     success, frame = cap.read()
     if not success:
         break
     
+    current_time = cap.get(cv2.CAP_PROP_POS_MSEC) / 1000  # Get time in seconds
     rgb_frame = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
     results = face_mesh.process(rgb_frame)
 
@@ -50,45 +49,95 @@ while cap.isOpened():
         for face_landmarks in results.multi_face_landmarks:
             height, width, _ = frame.shape
             
-            # Draw full face mesh
-            for landmark in face_landmarks.landmark:
-                x = int(landmark.x * width)
-                y = int(landmark.y * height)
-                cv2.circle(frame, (x, y), 1, (0, 255, 0), -1)
-            
             # Define facial and eye landmarks
             left_face_edge = 234  # Leftmost face landmark
             right_face_edge = 454  # Rightmost face landmark
-            left_eye_outer = 133  # Rightmost part of left eye
-            right_eye_outer = 362  # Leftmost part of right eye
+            left_eye_outer = 33  
+            left_eye_inner = 133
+            right_eye_outer = 263
+            right_eye_inner = 362 
+            left_pupil = [474, 475, 476, 477]  # Left eyeball center
+            right_pupil = [469, 470, 471, 472]  # Right eyeball center
             
             # Get coordinates
-            left_face_point = np.array([face_landmarks.landmark[left_face_edge].x * width, face_landmarks.landmark[left_face_edge].y * height])
-            right_face_point = np.array([face_landmarks.landmark[right_face_edge].x * width, face_landmarks.landmark[right_face_edge].y * height])
-            left_eye_point = np.array([face_landmarks.landmark[left_eye_outer].x * width, face_landmarks.landmark[left_eye_outer].y * height])
-            right_eye_point = np.array([face_landmarks.landmark[right_eye_outer].x * width, face_landmarks.landmark[right_eye_outer].y * height])
+            left_face_point = np.array([face_landmarks.landmark[left_face_edge].x * width, 
+                                        face_landmarks.landmark[left_face_edge].y * height])
+            right_face_point = np.array([face_landmarks.landmark[right_face_edge].x * width, 
+                                         face_landmarks.landmark[right_face_edge].y * height])
+            left_eye_point_outer = np.array([face_landmarks.landmark[left_eye_outer].x * width, 
+                                             face_landmarks.landmark[left_eye_outer].y * height])
+            right_eye_point_inner = np.array([face_landmarks.landmark[right_eye_inner].x * width, 
+                                              face_landmarks.landmark[right_eye_inner].y * height])
             
-            # Draw key points used for distance calculation in thick red
+            # Draw key points used for distance calculation
             cv2.circle(frame, tuple(left_face_point.astype(int)), 6, (0, 0, 255), -1)
             cv2.circle(frame, tuple(right_face_point.astype(int)), 6, (0, 0, 255), -1)
-            cv2.circle(frame, tuple(left_eye_point.astype(int)), 6, (0, 0, 255), -1)
-            cv2.circle(frame, tuple(right_eye_point.astype(int)), 6, (0, 0, 255), -1)
+            cv2.circle(frame, tuple(left_eye_point_outer.astype(int)), 6, (0, 0, 255), -1)
+            cv2.circle(frame, tuple(right_eye_point_inner.astype(int)), 6, (0, 255, 255), -1)
             
+            # Draw pupil markers
+            for i in left_pupil + right_pupil:
+                landmark = face_landmarks.landmark[i]
+                x = int(landmark.x * width)
+                y = int(landmark.y * height)
+                cv2.circle(frame, (x, y), 2, (255, 0, 0), -1)  # Thin blue marker for eyeball
+
             # Compute distances
-            left_distance = np.linalg.norm(left_face_point - left_eye_point)
-            right_distance = np.linalg.norm(right_face_point - right_eye_point)
-            
+            left_distance = np.linalg.norm(left_face_point - left_eye_point_outer)
+            right_distance = np.linalg.norm(right_face_point - right_eye_point_inner)
+
+            # Apply smoothing
+            left_distance = smooth_value(left_distance, eyeball_buffer_left)
+            right_distance = smooth_value(right_distance, eyeball_buffer_right)
+
             # Store reference distances on first frame
             if 'initial_left_distance' not in locals():
                 initial_left_distance = left_distance
                 initial_right_distance = right_distance
-            
+
+            # Compute thresholds dynamically
+            left_threshold = initial_left_distance * 0.6  # Adjusted based on average
+            right_threshold = initial_right_distance * 0.6  
+
             # Check for unsteady state
-            if left_distance < (initial_left_distance / 2) or right_distance < (initial_right_distance / 2):
-                cv2.putText(frame, "Not Steady", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
-            else:
-                cv2.putText(frame, "Steady State", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
-    
+            is_unsteady = left_distance < left_threshold or right_distance < right_threshold
+            
+            # Store state in buffer
+            state_buffer.append(is_unsteady)
+            smoothed_state = np.mean(state_buffer) > 0.5  # Majority voting in buffer
+
+            # Display state on the frame
+            state_text = "Steady State" if not smoothed_state else "Not Steady"
+            state_color = (0, 255, 0) if not smoothed_state else (0, 0, 255)
+            cv2.putText(frame, state_text, (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 1, state_color, 2)
+
+            # Detect transitions
+            if smoothed_state:  # Not Steady
+                if non_steady_start_time is None:
+                    non_steady_start_time = current_time  # Start timing
+                    initial_pupil_position = (left_eye_point_outer, right_eye_point_inner)  # Store initial position
+            else:  # Steady
+                if non_steady_start_time is not None:
+                    elapsed_time = round(current_time - non_steady_start_time, 2)
+                    
+                    # Compute total movement distance
+                    left_eye_travel = round(np.linalg.norm(initial_pupil_position[0] - left_eye_point_outer), 2)
+                    right_eye_travel = round(np.linalg.norm(initial_pupil_position[1] - right_eye_point_inner), 2)
+                    
+                    # Store transition data
+                    total_transitions.append({
+                        "Index": transition_index,
+                        "Start Time (s)": round(non_steady_start_time, 2),
+                        "Time Traversed (s)": elapsed_time,
+                        "Distance Traveled Left Eye (px)": left_eye_travel,
+                        "Distance Traveled Right Eye (px)": right_eye_travel
+                    })
+                    transition_index += 1  # Increment transition index
+                    
+                    # Reset tracking
+                    non_steady_start_time = None
+                    initial_pupil_position = None
+
     out.write(frame)
     cv2.imshow("Face and Eye Stability Tracking", frame)
 
@@ -98,3 +147,8 @@ while cap.isOpened():
 cap.release()
 out.release()
 cv2.destroyAllWindows()
+
+# Print recorded transition data
+print("Tracked Transitions:")
+for transition in total_transitions:
+    print(transition)
