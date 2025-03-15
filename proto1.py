@@ -8,7 +8,7 @@ mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(refine_landmarks=True, max_num_faces=1)
 
 # Load video file
-video_path = "./vHIT/vHITSlowed.mp4"
+video_path = "./Vhit Videos/vHITSlowed.mp4"
 cap = cv2.VideoCapture(video_path)
 
 # Get video properties
@@ -130,7 +130,8 @@ while cap.isOpened():
                         "Start Time (s)": round(non_steady_start_time, 2),
                         "Time Traversed (s)": elapsed_time,
                         "Distance Traveled Left Eye (px)": left_eye_travel,
-                        "Distance Traveled Right Eye (px)": right_eye_travel
+                        "Distance Traveled Right Eye (px)": right_eye_travel,
+                        "Status": "Delayed" if left_eye_travel > 65 and right_eye_travel > 65 else "Normal"
                     })
                     transition_index += 1  # Increment transition index
                     

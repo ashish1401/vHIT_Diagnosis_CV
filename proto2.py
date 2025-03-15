@@ -30,6 +30,7 @@ total_transitions = []
 non_steady_start_time = None
 initial_pupil_position = None
 transition_index = 1  # Initialize transition index
+last_transition_data = None  # Stores last transition data to keep displaying it until the next unsteady state
 
 def smooth_value(new_value, buffer):
     """Applies smoothing by averaging over recent values."""
@@ -125,21 +126,25 @@ while cap.isOpened():
                     right_eye_travel = round(np.linalg.norm(initial_pupil_position[1] - right_eye_point_inner), 2)
                     
                     # Store transition data
-                    transition_data = {
+                    last_transition_data = {
                         "Index": transition_index,
                         "Start Time (s)": round(non_steady_start_time, 2),
                         "Time Traversed (s)": elapsed_time,
                         "Distance Traveled Left Eye (px)": left_eye_travel,
-                        "Distance Traveled Right Eye (px)": right_eye_travel
+                        "Distance Traveled Right Eye (px)": right_eye_travel,
+                        "Status": "Delayed" if left_eye_travel > 65 and right_eye_travel > 65 else "Normal"
                     }
-                    if left_eye_travel > 65 and right_eye_travel > 65:
-                        transition_data["Status"] = "Delayed"
-                    total_transitions.append(transition_data)
+                    total_transitions.append(last_transition_data)
                     transition_index += 1  # Increment transition index
                     
                     # Reset tracking
                     non_steady_start_time = None
                     initial_pupil_position = None
+            
+            # Keep displaying the last transition data at bottom center until the next unsteady state
+            if last_transition_data:
+                text = f"Index:{last_transition_data['Index']} | L: {last_transition_data['Distance Traveled Left Eye (px)']}px | R: {last_transition_data['Distance Traveled Right Eye (px)']}px | {last_transition_data['Status']}"
+                cv2.putText(frame, text, (frame_width // 4, frame_height - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 0), 2)
 
     out.write(frame)
     cv2.imshow("Face and Eye Stability Tracking", frame)
@@ -150,8 +155,3 @@ while cap.isOpened():
 cap.release()
 out.release()
 cv2.destroyAllWindows()
-
-# Print recorded transition data
-print("Tracked Transitions:")
-for transition in total_transitions:
-    print(transition)

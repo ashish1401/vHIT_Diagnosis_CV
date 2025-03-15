@@ -1,0 +1,7 @@
+Tracked Transitions:
+{'Index': 1, 'Start Time (s)': 0.22, 'Time Traversed (s)': 0.18, 'Distance Traveled Left Eye (px)': 1.32, 'Distance Traveled Right Eye (px)': 6.67, 'Status': 'Normal'}
+{'Index': 2, 'Start Time (s)': 1.43, 'Time Traversed (s)': 1.37, 'Distance Traveled Left Eye (px)': 64.52, 'Distance Traveled Right Eye (px)': 88.18, 'Status': 'Normal'}
+{'Index': 3, 'Start Time (s)': 3.76, 'Time Traversed (s)': 2.6, 'Distance Traveled Left Eye (px)': 110.37, 'Distance Traveled Right Eye (px)': 136.16, 'Status': 'Delayed'}
+{'Index': 4, 'Start Time (s)': 6.76, 'Time Traversed (s)': 0.43, 'Distance Traveled Left Eye (px)': 131.59, 'Distance Traveled Right Eye (px)': 148.32, 'Status': 'Delayed'}
+{'Index': 5, 'Start Time (s)': 7.8, 'Time Traversed (s)': 0.47, 'Distance Traveled Left Eye (px)': 97.88, 'Distance Traveled Right Eye (px)': 112.23, 'Status': 'Delayed'}
+{'Index': 6, 'Start Time (s)': 9.1, 'Time Traversed (s)': 2.6, 'Distance Traveled Left Eye (px)': 108.1, 'Distance Traveled Right Eye (px)': 137.63, 'Status': 'Delayed'}

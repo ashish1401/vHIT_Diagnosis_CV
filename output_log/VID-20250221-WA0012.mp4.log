@@ -1,0 +1,4 @@
+Tracked Transitions:
+{'Index': 1, 'Start Time (s)': 0.58, 'Time Traversed (s)': 11.03, 'Distance Traveled Left Eye (px)': 442.84, 'Distance Traveled Right Eye (px)': 337.94, 'Status': 'Delayed'}
+{'Index': 2, 'Start Time (s)': 12.44, 'Time Traversed (s)': 1.23, 'Distance Traveled Left Eye (px)': 257.11, 'Distance Traveled Right Eye (px)': 300.56, 'Status': 'Delayed'}
+{'Index': 3, 'Start Time (s)': 15.01, 'Time Traversed (s)': 0.17, 'Distance Traveled Left Eye (px)': 152.68, 'Distance Traveled Right Eye (px)': 140.46, 'Status': 'Delayed'}

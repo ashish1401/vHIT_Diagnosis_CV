@@ -1,0 +1,13 @@
+Tracked Transitions:
+{'Index': 1, 'Start Time (s)': 4.33, 'Time Traversed (s)': 1.13, 'Distance Traveled Left Eye (px)': 195.3, 'Distance Traveled Right Eye (px)': 191.01, 'Status': 'Delayed'}
+{'Index': 2, 'Start Time (s)': 5.76, 'Time Traversed (s)': 0.83, 'Distance Traveled Left Eye (px)': 50.9, 'Distance Traveled Right Eye (px)': 59.89, 'Status': 'Normal'}
+{'Index': 3, 'Start Time (s)': 7.3, 'Time Traversed (s)': 0.97, 'Distance Traveled Left Eye (px)': 136.02, 'Distance Traveled Right Eye (px)': 114.29, 'Status': 'Delayed'}
+{'Index': 4, 'Start Time (s)': 9.86, 'Time Traversed (s)': 1.47, 'Distance Traveled Left Eye (px)': 149.55, 'Distance Traveled Right Eye (px)': 173.92, 'Status': 'Delayed'}
+{'Index': 5, 'Start Time (s)': 13.13, 'Time Traversed (s)': 1.23, 'Distance Traveled Left Eye (px)': 135.93, 'Distance Traveled Right Eye (px)': 103.33, 'Status': 'Delayed'}
+{'Index': 6, 'Start Time (s)': 14.89, 'Time Traversed (s)': 1.0, 'Distance Traveled Left Eye (px)': 108.39, 'Distance Traveled Right Eye (px)': 122.51, 'Status': 'Delayed'}
+{'Index': 7, 'Start Time (s)': 16.66, 'Time Traversed (s)': 1.07, 'Distance Traveled Left Eye (px)': 104.6, 'Distance Traveled Right Eye (px)': 83.31, 'Status': 'Delayed'}
+{'Index': 8, 'Start Time (s)': 18.06, 'Time Traversed (s)': 1.07, 'Distance Traveled Left Eye (px)': 40.63, 'Distance Traveled Right Eye (px)': 46.91, 'Status': 'Normal'}
+{'Index': 9, 'Start Time (s)': 20.03, 'Time Traversed (s)': 1.2, 'Distance Traveled Left Eye (px)': 137.41, 'Distance Traveled Right Eye (px)': 109.97, 'Status': 'Delayed'}
+{'Index': 10, 'Start Time (s)': 22.83, 'Time Traversed (s)': 1.17, 'Distance Traveled Left Eye (px)': 103.34, 'Distance Traveled Right Eye (px)': 113.89, 'Status': 'Delayed'}
+{'Index': 11, 'Start Time (s)': 24.62, 'Time Traversed (s)': 1.43, 'Distance Traveled Left Eye (px)': 130.09, 'Distance Traveled Right Eye (px)': 105.1, 'Status': 'Delayed'}
+{'Index': 12, 'Start Time (s)': 26.46, 'Time Traversed (s)': 0.77, 'Distance Traveled Left Eye (px)': 78.72, 'Distance Traveled Right Eye (px)': 84.13, 'Status': 'Delayed'}
